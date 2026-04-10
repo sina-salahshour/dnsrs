@@ -1,0 +1,2 @@
+[registries]
+brige-cargo = { index = "sparse+http://pkg.ibcbridgeai.org/repository/cargo-group/" }
