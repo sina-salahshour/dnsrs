@@ -1,7 +1,10 @@
 use anyhow::{Result, anyhow};
+use clap::CommandFactory;
 use clap::{Parser, Subcommand};
+use clap_complete::{Shell, generate};
 use inquire::{Select, Text};
 use serde::{Deserialize, Serialize};
+use std::io;
 use std::{fs, path::PathBuf};
 
 use libc;
@@ -22,6 +25,12 @@ fn elevate_if_needed() {
         eprintln!("Failed to elevate privileges: {}", err);
         std::process::exit(1);
     }
+}
+
+fn generate_completions(shell: Shell) {
+    let mut cmd = Cli::command();
+
+    generate(shell, &mut cmd, "dnsrs", &mut io::stdout());
 }
 
 #[derive(Parser)]
@@ -45,6 +54,11 @@ enum Commands {
     Undo,
     Reset,
     List,
+
+    Completions {
+        #[arg(value_enum)]
+        shell: clap_complete::Shell,
+    },
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -67,12 +81,17 @@ struct History {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Current | Commands::List => {}
+        Commands::Current | Commands::List | Commands::Completions { shell: _ } => {}
         _ => {
             elevate_if_needed();
         }
     };
     match cli.command {
+        Commands::Completions { shell } => {
+            generate_completions(shell);
+            Ok(())
+        }
+
         Commands::Add { name, ips } => add_profile(name, ips),
         Commands::Set { name } => set_profile(name),
         Commands::Current => show_current(),
