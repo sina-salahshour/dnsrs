@@ -255,6 +255,13 @@ compinit
 dnsrs completions fish > ~/.config/fish/completions/dnsrs.fish
 ```
 
+
+or
+
+``bash
+echo "dnsrs completions fish | source" > ~/.config/fish/config.fish
+```
+
 ---
 
 ## 🐚 PowerShell
